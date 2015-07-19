@@ -23,8 +23,10 @@ var (
 func init() {
   router = mux.NewRouter()
 
-  router.Handle("/testEnforceJSON", enforceJSONHandler(TestHandle))
-  router.Handle("/testAuth", authHandler(TestHandle))
+  testHandler := http.HandlerFunc(testHandle)
+
+  router.Handle("/testEnforceJSON", middlewares.EnforceJSONHandler(testHandler))
+  router.Handle("/testAuth", middlewares.AuthHandler(testHandler))
 
   server = httptest.NewServer(router)
 
@@ -32,7 +34,7 @@ func init() {
   testAuthUrl = fmt.Sprintf("%s/testAuth", server.URL)
 }
 
-func TestHandle(w http.ResponseWriter, r *http.Request) {
+func testHandle(w http.ResponseWriter, r *http.Request) {
     w.Write([]byte("MIDDLEWARE PASSED TO NEXT HANDLER"))
 }
 
@@ -50,10 +52,10 @@ func TestEnforceJSONHandler(t *testing.T) {
   if res.StatusCode != 400 {
     t.Errorf("Bad request expected on empty payload, got status %d", res.StatusCode)
   }
+
   // TESTING WRONG CONTENT TYPE
   reader = strings.NewReader("This is a test")
   request, err = http.NewRequest("POST", testEnforceJSONUrl, reader)
-  request.Header.Add("Content-Type", "text/plain")
 
   res, err = http.DefaultClient.Do(request)
 
@@ -64,9 +66,11 @@ func TestEnforceJSONHandler(t *testing.T) {
   if res.StatusCode != 415 {
     t.Errorf("Wrong media type expected on anything else than JSON got status %d and content-type %s", res.StatusCode, res.Header.Get("Content-Type"))
   }
+
   // TESTING JSON PASS
-  reader = strings.NewReader(`{"testing": "is cool"}`)
+  reader = bytes.NewBuffer([]byte(`{"testing": "is cool"}`))
   request, err = http.NewRequest("POST", testEnforceJSONUrl, reader)
+  request.Header.Set("Content-Type", "application/json; charset=utf-8")
 
   res, err = http.DefaultClient.Do(request)
 
@@ -76,7 +80,9 @@ func TestEnforceJSONHandler(t *testing.T) {
   buf := new(bytes.Buffer)
   buf.ReadFrom(res.Body)
 
-  if buf.Bytes() != "MIDDLEWARE PASSED TO NEXT HANDLER" {
-    t.Error("Request should be passed to next handler on valid JSON")
+  resBody := string(buf.Bytes()[:]);
+
+  if resBody != "MIDDLEWARE PASSED TO NEXT HANDLER" {
+    t.Errorf("Request should be passed to next handler on valid JSON. Got msg: %s", resBody)
   }
 }
