@@ -7,5 +7,5 @@ import (
 )
 
 func main() {
-  log.Fatal(http.ListenAndServe(":1337", routes.Handlers))
+  log.Fatal(http.ListenAndServe(":1337", routes.Handlers()))
 }
