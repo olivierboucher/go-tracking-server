@@ -1,9 +1,6 @@
 package routes
 
 import (
-  "encoding/json"
-  "io"
-  "log"
   "net/http"
   "github.com/gorilla/mux"
   "tracking-server/middlewares"
@@ -17,7 +14,8 @@ func handleTrack(w http.ResponseWriter, r *http.Request) {
 func Handlers() *mux.Router {
   r := mux.NewRouter()
   //Each supported route is being added to the router
-  r.Handle("/track", enforceJSONHandler(authHandler(handleTrack))).Methods("POST", "GET")
+  trackHandler := http.HandlerFunc(handleTrack)
+  r.Handle("/track", middlewares.EnforceJSONHandler(middlewares.AuthHandler(trackHandler))).Methods("POST", "GET")
 
   return r
 }
