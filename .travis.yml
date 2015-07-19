@@ -3,4 +3,4 @@ go:
   - 1.4.1
 install:
   - go get github.com/gorilla/mux
-script: go test -v tracking-server/middlewares
+script: go test -v middlewares
