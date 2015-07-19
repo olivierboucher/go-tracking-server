@@ -1,0 +1,6 @@
+language: go
+go:
+  - tip
+install:
+  - go get github.com/gorilla/mux
+script: go test -v tracking-server/middlewares
