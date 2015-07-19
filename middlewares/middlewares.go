@@ -3,7 +3,6 @@ package middlewares
 import (
   "bytes"
   "net/http"
-  "log"
 )
 //AuthHandler middleware
 //This handler handles auth based on the assertion that the request is valid JSON
@@ -32,12 +31,10 @@ func EnforceJSONHandler(next http.Handler) http.Handler {
     contentType := r.Header.Get("Content-Type")
 
     if mimeType != "text/plain; charset=utf-8" {
-      //log.Printf("ERR : Wrong mime type : %s", mimeType)
       http.Error(w, http.StatusText(415), 415)
       return
     }
     if contentType != "application/json; charset=utf-8" {
-      //log.Printf("ERR : Wrong content type : %s", contentType)
       http.Error(w, http.StatusText(415), 415)
       return
     }
