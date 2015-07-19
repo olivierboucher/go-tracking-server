@@ -1,7 +1,7 @@
 package middlewares_test
 
 import (
-  "tracking-server/middlewares"
+  "github.com/OlivierBoucher/go-tracking-server/middlewares"
   "net/http"
   "net/http/httptest"
   "testing"

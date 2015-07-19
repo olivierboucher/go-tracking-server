@@ -3,6 +3,5 @@ go:
   - 1.4.1
 install:
   - go get github.com/gorilla/mux
-  - export GOPATH="${TRAVIS_BUILD_DIR}:$GOPATH"
 
 script: go test -v ./...

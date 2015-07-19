@@ -3,7 +3,7 @@ package main
 import (
   "log"
   "net/http"
-  "tracking-server/routes"
+  "github.com/OlivierBoucher/go-tracking-server/routes"
 )
 
 func main() {

@@ -3,7 +3,7 @@ package routes
 import (
   "net/http"
   "github.com/gorilla/mux"
-  "tracking-server/middlewares"
+  "github.com/OlivierBoucher/go-tracking-server/middlewares"
 )
 //Handler for /track route
 //From here we have a valid authentified json request
