@@ -7,6 +7,7 @@ import (
 )
 //AuthHandler middleware
 //This handler handles auth based on the assertion that the request is valid JSON
+//Verifies for access, blocks handlers chain if access denied
 func AuthHandler(next http.Handler) http.Handler {
   return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
     //Logic for auth goes here
@@ -16,6 +17,7 @@ func AuthHandler(next http.Handler) http.Handler {
 }
 //EnforceJSONHandler middleware
 //This handler can handle raw requests
+//This handler checks for detected content type as well as content-type header
 func EnforceJSONHandler(next http.Handler) http.Handler {
   return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
     //Ensure that there is a body

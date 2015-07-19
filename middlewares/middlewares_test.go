@@ -38,6 +38,10 @@ func testHandle(w http.ResponseWriter, r *http.Request) {
     w.Write([]byte("MIDDLEWARE PASSED TO NEXT HANDLER"))
 }
 
+func TestAuthHandler(t *testing.T) {
+  //TODO : Test once implemented
+}
+
 func TestEnforceJSONHandler(t *testing.T) {
   //TESTING EMPTY PAYLOAD
   reader = strings.NewReader("");
