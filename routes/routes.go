@@ -17,7 +17,7 @@ func handleTrack(w http.ResponseWriter, r *http.Request) {
 func Handlers() *mux.Router {
   r := mux.NewRouter()
 
-  r.HandleFunc("/track", enforceJSONHandler(authHandler(handleTrack))).Methods("POST", "GET")
+  r.Handle("/track", enforceJSONHandler(authHandler(handleTrack))).Methods("POST", "GET")
 
   return r
 }
