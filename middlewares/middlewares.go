@@ -3,14 +3,35 @@ package middlewares
 import (
   "bytes"
   "net/http"
+  "github.com/OlivierBoucher/go-tracking-server/datastores"
 )
 //AuthHandler middleware
 //This handler handles auth based on the assertion that the request is valid JSON
 //Verifies for access, blocks handlers chain if access denied
 func AuthHandler(next http.Handler) http.Handler {
   return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-    //Logic for auth goes here
-    //TODO : Not sure what sql database I'll be using now.. Let's just authorize everything
+    //TODO: This can change for body instead ?
+    token := r.Header.Get("tracking-token")
+    //Bad request token empty or not present
+    if token == "" {
+      http.Error(w, http.StatusText(400), 400)
+      return
+    }
+
+    db := datastores.GetAuthInstance();
+    authorized, err := db.IsTokenAuthorized(token)
+
+    // Internal server error TODO: Handle this
+    if err != nil {
+      http.Error(w, http.StatusText(500), 500)
+      return
+    }
+    // Unauthorized
+    if !authorized {
+      http.Error(w, http.StatusText(401), 401)
+      return
+    }
+
     next.ServeHTTP(w, r)
   })
 }
