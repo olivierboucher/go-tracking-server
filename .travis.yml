@@ -3,5 +3,6 @@ go:
   - 1.4.1
 install:
   - go get github.com/gorilla/mux
+  - go get github.com/gorilla/websocket
 
 script: go test -v ./...
