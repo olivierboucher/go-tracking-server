@@ -3,13 +3,13 @@ package middlewares
 import (
   "bytes"
   "net/http"
-  "github.com/OlivierBoucher/go-tracking-server/datastores"
+  "github.com/OlivierBoucher/go-tracking-server/ctx"
 )
 //AuthHandler middleware
 //This handler handles auth based on the assertion that the request is valid JSON
 //Verifies for access, blocks handlers chain if access denied
-func AuthHandler(next http.Handler) http.Handler {
-  return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+func AuthHandler(next *ctx.Handler) *ctx.Handler {
+  return &ctx.Handler{next.Context, func(c *ctx.Context, w http.ResponseWriter, r *http.Request){
     //TODO: This can change for body instead ?
     token := r.Header.Get("tracking-token")
     //Bad request token empty or not present
@@ -18,8 +18,7 @@ func AuthHandler(next http.Handler) http.Handler {
       return
     }
 
-    db := datastores.GetAuthInstance();
-    authorized, err := db.IsTokenAuthorized(token)
+    authorized, err := c.AuthDb.IsTokenAuthorized(token)
 
     // Internal server error TODO: Handle this
     if err != nil {
@@ -33,13 +32,13 @@ func AuthHandler(next http.Handler) http.Handler {
     }
 
     next.ServeHTTP(w, r)
-  })
+  }}
 }
 //EnforceJSONHandler middleware
 //This handler can handle raw requests
 //This handler checks for detected content type as well as content-type header
-func EnforceJSONHandler(next http.Handler) http.Handler {
-  return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+func EnforceJSONHandler(next *ctx.Handler) *ctx.Handler {
+    return &ctx.Handler{next.Context, func(c *ctx.Context, w http.ResponseWriter, r *http.Request) {
     //Ensure that there is a body
     if r.ContentLength == 0 {
       http.Error(w, http.StatusText(400), 400)
@@ -60,5 +59,5 @@ func EnforceJSONHandler(next http.Handler) http.Handler {
       return
     }
     next.ServeHTTP(w, r);
-  })
+  }}
 }

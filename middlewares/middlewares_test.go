@@ -10,6 +10,7 @@ import (
   "fmt"
   "strings"
   "bytes"
+  "github.com/OlivierBoucher/go-tracking-server/ctx"
 )
 
 var (
@@ -22,8 +23,8 @@ var (
 
 func init() {
   router = mux.NewRouter()
-
-  testHandler := http.HandlerFunc(testHandle)
+  context := &ctx.Context{}
+  testHandler := &ctx.Handler{context, testHandle}
 
   router.Handle("/testEnforceJSON", middlewares.EnforceJSONHandler(testHandler))
   router.Handle("/testAuth", middlewares.AuthHandler(testHandler))
@@ -34,7 +35,7 @@ func init() {
   testAuthUrl = fmt.Sprintf("%s/testAuth", server.URL)
 }
 
-func testHandle(w http.ResponseWriter, r *http.Request) {
+func testHandle(c *ctx.Context, w http.ResponseWriter, r *http.Request) {
     w.Write([]byte("MIDDLEWARE PASSED TO NEXT HANDLER"))
 }
 

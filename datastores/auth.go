@@ -7,25 +7,11 @@ import (
 //AuthDatastore represents a wrapper around sql.DB
 type AuthDatastore struct {
   sql.DB
-  init bool
 }
 
-var (
-  instance AuthDatastore
-)
-
-//GetAuthInstance returns the singleton
-func GetAuthInstance() *AuthDatastore {
-  if !instance.init {
-    //TODO: Fix the connection string
-    db, err := sql.Open("mysql", "")
-    if err != nil {
-      //TODO : Handle this
-      panic(err)
-    }
-    instance = AuthDatastore{*db, true}
-  }
-  return &instance
+//NewAuthInstance returns a wrapped db connection
+func NewAuthInstance(db *sql.DB) *AuthDatastore {
+  return &AuthDatastore{*db}
 }
 //IsTokenAuthorized checks wheter a token is valid or not
 func (d *AuthDatastore) IsTokenAuthorized(token string) (bool, error) {

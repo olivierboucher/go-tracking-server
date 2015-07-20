@@ -5,6 +5,7 @@ import (
   "github.com/gorilla/mux"
   "github.com/gorilla/websocket"
   "github.com/OlivierBoucher/go-tracking-server/middlewares"
+  "github.com/OlivierBoucher/go-tracking-server/ctx"
 )
 var upgrader = websocket.Upgrader{
     ReadBufferSize:  1024,
@@ -16,12 +17,12 @@ var upgrader = websocket.Upgrader{
 }
 //Handler for /track route
 //From here we have a valid authentified json request
-func handleTrack(w http.ResponseWriter, r *http.Request) {
+func handleTrack(c *ctx.Context, w http.ResponseWriter, r *http.Request) {
   //TODO: Handle the json payload
 }
 //Handler for /connected route
 //Allows websocket connection
-func handleConnected(w http.ResponseWriter, r *http.Request) {
+func handleConnected(c *ctx.Context, w http.ResponseWriter, r *http.Request) {
   conn, err := upgrader.Upgrade(w, r, nil)
     if err != nil {
         //TODO: Handle the error
@@ -33,7 +34,7 @@ func handleConnected(w http.ResponseWriter, r *http.Request) {
             return
         }
         //TODO: Define a protocol
-        
+
         err = conn.WriteMessage(messageType, p);
         if  err != nil {
             return
@@ -41,12 +42,12 @@ func handleConnected(w http.ResponseWriter, r *http.Request) {
     }
 }
 //Handlers - Returns a mux router containing all handlers for all routes
-func Handlers() *mux.Router {
+func Handlers(c *ctx.Context) *mux.Router {
   r := mux.NewRouter()
   //Each supported route is being added to the router
-  trackHandler := http.HandlerFunc(handleTrack)
+  trackHandler := &ctx.Handler{c, handleTrack}
   r.Handle("/track", middlewares.EnforceJSONHandler(middlewares.AuthHandler(trackHandler))).Methods("POST", "GET")
-  connectedHandler := http.HandlerFunc(handleConnected)
+  connectedHandler := &ctx.Handler{c, handleConnected}
   r.Handle("/connected", connectedHandler)
 
   return r
