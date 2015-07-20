@@ -2,8 +2,10 @@ package routes
 
 import (
   "net/http"
+  
   "github.com/gorilla/mux"
   "github.com/gorilla/websocket"
+
   "github.com/OlivierBoucher/go-tracking-server/middlewares"
   "github.com/OlivierBoucher/go-tracking-server/ctx"
 )

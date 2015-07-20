@@ -3,6 +3,8 @@ package middlewares
 import (
   "bytes"
   "net/http"
+  "log"
+
   "github.com/OlivierBoucher/go-tracking-server/ctx"
 )
 //AuthHandler middleware
@@ -11,7 +13,7 @@ import (
 func AuthHandler(next *ctx.Handler) *ctx.Handler {
   return &ctx.Handler{next.Context, func(c *ctx.Context, w http.ResponseWriter, r *http.Request){
     //TODO: This can change for body instead ?
-    token := r.Header.Get("tracking-token")
+    token := r.Header.Get("Tracking-Token")
     //Bad request token empty or not present
     if token == "" {
       http.Error(w, http.StatusText(400), 400)
@@ -22,6 +24,7 @@ func AuthHandler(next *ctx.Handler) *ctx.Handler {
 
     // Internal server error TODO: Handle this
     if err != nil {
+      log.Fatal(err.Error())
       http.Error(w, http.StatusText(500), 500)
       return
     }
