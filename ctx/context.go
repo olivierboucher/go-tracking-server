@@ -11,3 +11,11 @@ type Context struct {
   Queue *queues.RabbitMQConnection
   JSONTrackingEventValidator *validators.JSONEventTrackingValidator
 }
+//NewContext returns a new context from arguments
+func NewContext(a *datastores.AuthDatastore, q *queues.RabbitMQConnection, jtv *validators.JSONEventTrackingValidator) *Context {
+  return &Context{
+    AuthDb: a,
+    Queue:q,
+    JSONTrackingEventValidator: jtv,
+  }
+}

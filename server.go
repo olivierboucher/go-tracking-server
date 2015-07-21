@@ -4,6 +4,9 @@ import (
   "log"
   "net/http"
   "database/sql"
+  "io/ioutil"
+  "encoding/json"
+  "os"
 
   "github.com/streadway/amqp"
 
@@ -13,24 +16,46 @@ import (
   "github.com/OlivierBoucher/go-tracking-server/queues"
   "github.com/OlivierBoucher/go-tracking-server/validators"
 )
+
+type srvConfiguration struct {
+  AuthDbConnectionString string `json:"authDb"`
+  QueueConnectionUrl string `json:"queueUrl"`
+}
+
 func main() {
-  authDb, err := sql.Open("mysql", "")
+  config := loadJSONConfig()
+
+  authDb, err := sql.Open("mysql", config.AuthDbConnectionString)
   if err != nil {
     log.Fatalf("Error on initializing database connection: %s", err.Error())
+    os.Exit(1)
   }
   defer authDb.Close()
 
-  queueConn, err := amqp.Dial("")
+  queueConn, err := amqp.Dial(config.QueueConnectionUrl)
   if err != nil {
     log.Fatalf("Error on initializing persistent queue connection: %s", err.Error())
+    os.Exit(1)
   }
   defer queueConn.Close()
 
-  context := &ctx.Context{
-    AuthDb: datastores.NewAuthInstance(authDb),
-    Queue:queues.NewRabbitMQConnection(queueConn),
-    JSONTrackingEventValidator: validators.NewJSONEventTrackingValidator(),
-  }
+  context := ctx.NewContext(
+    datastores.NewAuthInstance(authDb),
+    queues.NewRabbitMQConnection(queueConn),
+    validators.NewJSONEventTrackingValidator())
 
   log.Fatal(http.ListenAndServe(":1337", routes.Handlers(context)))
+}
+
+func loadJSONConfig() *srvConfiguration {
+  file, err := ioutil.ReadFile("./config.json")
+  if err != nil {
+    log.Fatalf("Error on reading json config: %s", err.Error())
+    os.Exit(1)
+  }
+
+  var config srvConfiguration
+  json.Unmarshal(file, &config)
+
+  return &config
 }
