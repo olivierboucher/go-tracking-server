@@ -61,6 +61,7 @@ func EnforceJSONHandler(next *ctx.Handler) *ctx.Handler {
   })
 }
 //ValidateEventTrackingPayloadHandler validates that the payload has a valid JSON Schema
+//Uses a FinalHandler as next because it consumes the request's body
 func ValidateEventTrackingPayloadHandler(next *ctx.FinalHandler) *ctx.Handler {
     return ctx.NewHandler(next.Context, func(c *ctx.Context, w http.ResponseWriter, r *http.Request) {
       //Validate the payload

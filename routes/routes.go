@@ -9,6 +9,7 @@ import (
   "github.com/OlivierBoucher/go-tracking-server/middlewares"
   "github.com/OlivierBoucher/go-tracking-server/ctx"
 )
+
 var upgrader = websocket.Upgrader{
     ReadBufferSize:  1024,
     WriteBufferSize: 1024,
