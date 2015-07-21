@@ -22,7 +22,7 @@ func main() {
 
   queueConn, err := amqp.Dial("")
   if err != nil {
-    log.Fatalf("Error on initializing peristent queue connection: %s", err.Error())
+    log.Fatalf("Error on initializing persistent queue connection: %s", err.Error())
   }
   defer queueConn.Close()
 
