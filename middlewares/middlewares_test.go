@@ -16,6 +16,7 @@ import (
   "github.com/OlivierBoucher/go-tracking-server/middlewares"
   "github.com/OlivierBoucher/go-tracking-server/ctx"
   "github.com/OlivierBoucher/go-tracking-server/datastores"
+  "github.com/OlivierBoucher/go-tracking-server/validators"
 )
 
 var (
@@ -24,6 +25,7 @@ var (
   router *mux.Router
   testEnforceJSONUrl string
   testAuthUrl string
+  testValidateEventTrackingPayloadHandlerUrl string
 )
 
 func init() {
@@ -41,16 +43,18 @@ func init() {
         WillReturnRows(sqlmock.NewRows(columns).AddRow(true))
 
   router = mux.NewRouter()
-  context := &ctx.Context{AuthDb: datastores.NewAuthInstance(mockedDb)}
+  context := ctx.NewContext(datastores.NewAuthInstance(mockedDb), nil, validators.NewJSONEventTrackingValidator())
   testHandler := &ctx.Handler{context, testHandle}
 
   router.Handle("/testEnforceJSON", middlewares.EnforceJSONHandler(testHandler))
   router.Handle("/testAuth", middlewares.AuthHandler(testHandler))
+  router.Handle("/testValidateEventTrackingPayloadHandler", middlewares.ValidateEventTrackingPayloadHandler(testHandler))
 
   server = httptest.NewServer(router)
 
   testEnforceJSONUrl = fmt.Sprintf("%s/testEnforceJSON", server.URL)
   testAuthUrl = fmt.Sprintf("%s/testAuth", server.URL)
+  testValidateEventTrackingPayloadHandlerUrl = fmt.Sprintf("%s/testValidateEventTrackingPayloadHandler", server.URL)
 }
 
 func testHandle(c *ctx.Context, w http.ResponseWriter, r *http.Request) {
@@ -158,4 +162,41 @@ func TestEnforceJSONHandler(t *testing.T) {
     t.Errorf("Request should be passed to next handler on valid JSON. Got msg: %s", resBody)
   }
   log.Print("Valid payload conditional passed")
+}
+
+func TestValidateEventTrackingPayloadHandler(t *testing.T) {
+  // TESTING WRONG CONTENT TYPE
+  reader = bytes.NewBuffer([]byte(`{"testing": "is cool"}`))
+  request, err := http.NewRequest("POST", testValidateEventTrackingPayloadHandlerUrl, reader)
+
+  res, err := http.DefaultClient.Do(request)
+
+  if err != nil  {
+    t.Error(err)
+  }
+
+  if res.StatusCode != 400 {
+    t.Errorf("Wrong schema passed validation, status code : %d", res.StatusCode)
+  }
+  log.Print("Invalid json conditional passed")
+
+  //TESTING VALID JSON
+  reader = bytes.NewBuffer([]byte(`[{"event":"TEST","date":"2015-01-26","properties":[{"name":"PROP1","value":"string value"},{"name":"PROP2","value":123},{"name":"PROP3","value":12.567}]}]`))
+  request, err = http.NewRequest("POST", testValidateEventTrackingPayloadHandlerUrl, reader)
+
+  res, err = http.DefaultClient.Do(request)
+
+  if err != nil  {
+    t.Error(err)
+  }
+
+  buf := new(bytes.Buffer)
+  buf.ReadFrom(res.Body)
+
+  resBody := string(buf.Bytes()[:]);
+
+  if resBody != "MIDDLEWARE PASSED TO NEXT HANDLER" {
+    t.Errorf("Request should be passed to next handler on valid JSON. Got msg: %s", resBody)
+  }
+  log.Print("Valid conditional passed")
 }

@@ -74,9 +74,11 @@ func ValidateEventTrackingPayloadHandler(next *ctx.Handler) *ctx.Handler {
       buf.ReadFrom(r.Body)
       requestLoader := gojsonschema.NewStringLoader(string(buf.Bytes()))
 
-      result, err := gojsonschema.Validate(c.JSONTrackingEventValidator.Schema, requestLoader)
+      result, err  := c.JSONTrackingEventValidator.Schema.Validate(requestLoader)
       if err != nil {
           //TODO: Handle the error
+          http.Error(w, http.StatusText(500), 500)
+          return
       }
 
       if ! result.Valid() {
