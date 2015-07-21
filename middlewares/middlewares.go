@@ -5,6 +5,8 @@ import (
   "net/http"
   "log"
 
+  "github.com/xeipuuv/gojsonschema"
+
   "github.com/OlivierBoucher/go-tracking-server/ctx"
 )
 //AuthHandler middleware
@@ -42,25 +44,45 @@ func AuthHandler(next *ctx.Handler) *ctx.Handler {
 //This handler checks for detected content type as well as content-type header
 func EnforceJSONHandler(next *ctx.Handler) *ctx.Handler {
     return &ctx.Handler{next.Context, func(c *ctx.Context, w http.ResponseWriter, r *http.Request) {
-    //Ensure that there is a body
-    if r.ContentLength == 0 {
-      http.Error(w, http.StatusText(400), 400)
-      return
-    }
-    //Ensure that its json
-    buf := new(bytes.Buffer)
-    buf.ReadFrom(r.Body)
-    mimeType := http.DetectContentType(buf.Bytes());
-    contentType := r.Header.Get("Content-Type")
+      //Ensure that there is a body
+      if r.ContentLength == 0 {
+        http.Error(w, http.StatusText(400), 400)
+        return
+      }
+      //Ensure that its json
+      buf := new(bytes.Buffer)
+      buf.ReadFrom(r.Body)
+      mimeType := http.DetectContentType(buf.Bytes());
+      contentType := r.Header.Get("Content-Type")
 
-    if mimeType != "text/plain; charset=utf-8" {
-      http.Error(w, http.StatusText(415), 415)
-      return
-    }
-    if contentType != "application/json; charset=utf-8" {
-      http.Error(w, http.StatusText(415), 415)
-      return
-    }
-    next.ServeHTTP(w, r);
+      if mimeType != "text/plain; charset=utf-8" {
+        http.Error(w, http.StatusText(415), 415)
+        return
+      }
+      if contentType != "application/json; charset=utf-8" {
+        http.Error(w, http.StatusText(415), 415)
+        return
+      }
+      next.ServeHTTP(w, r);
   }}
+}
+//ValidateEventTrackingPayloadHandler validates that the payload has a valid JSON Schema
+func ValidateEventTrackingPayloadHandler(next *ctx.Handler) *ctx.Handler {
+    return &ctx.Handler{next.Context, func(c *ctx.Context, w http.ResponseWriter, r *http.Request) {
+      //Validate the payload
+      buf := new(bytes.Buffer)
+      buf.ReadFrom(r.Body)
+      requestLoader := gojsonschema.NewStringLoader(string(buf.Bytes()))
+
+      result, err := gojsonschema.Validate(c.JSONTrackingEventValidator.Schema, requestLoader)
+      if err != nil {
+          //TODO: Handle the error
+      }
+
+      if ! result.Valid() {
+        http.Error(w, http.StatusText(400), 400)
+        return
+      }
+      next.ServeHTTP(w, r);
+    }}
 }
