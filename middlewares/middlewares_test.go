@@ -44,11 +44,12 @@ func init() {
 
   router = mux.NewRouter()
   context := ctx.NewContext(datastores.NewAuthInstance(mockedDb), nil, validators.NewJSONEventTrackingValidator())
-  testHandler := &ctx.Handler{context, testHandle}
+  testHandler := ctx.NewHandler(context, testHandle)
+  testFinalHander := ctx.NewFinalHandler(context, []byte(""), testFinalHandle)
 
   router.Handle("/testEnforceJSON", middlewares.EnforceJSONHandler(testHandler))
   router.Handle("/testAuth", middlewares.AuthHandler(testHandler))
-  router.Handle("/testValidateEventTrackingPayloadHandler", middlewares.ValidateEventTrackingPayloadHandler(testHandler))
+  router.Handle("/testValidateEventTrackingPayloadHandler", middlewares.ValidateEventTrackingPayloadHandler(testFinalHander))
 
   server = httptest.NewServer(router)
 
@@ -56,7 +57,9 @@ func init() {
   testAuthUrl = fmt.Sprintf("%s/testAuth", server.URL)
   testValidateEventTrackingPayloadHandlerUrl = fmt.Sprintf("%s/testValidateEventTrackingPayloadHandler", server.URL)
 }
-
+func testFinalHandle(c *ctx.Context,p []byte, w http.ResponseWriter, r *http.Request) {
+  w.Write([]byte("MIDDLEWARE PASSED TO NEXT HANDLER"))
+}
 func testHandle(c *ctx.Context, w http.ResponseWriter, r *http.Request) {
     w.Write([]byte("MIDDLEWARE PASSED TO NEXT HANDLER"))
 }

@@ -2,7 +2,6 @@ package routes
 
 import (
   "net/http"
-  "bytes"
 
   "github.com/gorilla/mux"
   "github.com/gorilla/websocket"
@@ -20,10 +19,8 @@ var upgrader = websocket.Upgrader{
 }
 //Handler for /track route
 //From here we have a valid authentified json request with correct schema
-func handleTrack(c *ctx.Context, w http.ResponseWriter, r *http.Request) {
-  buf := new(bytes.Buffer)
-  buf.ReadFrom(r.Body)
-  c.Queue.PublishEventsTrackingTask(buf.Bytes())
+func handleTrack(c *ctx.Context, p []byte, w http.ResponseWriter, r *http.Request) {
+  c.Queue.PublishEventsTrackingTask(p)
 }
 //Handler for /connected route
 //Allows websocket connection
@@ -50,7 +47,7 @@ func handleConnected(c *ctx.Context, w http.ResponseWriter, r *http.Request) {
 func Handlers(c *ctx.Context) *mux.Router {
   r := mux.NewRouter()
   //Each supported route is being added to the router
-  trackHandler := &ctx.Handler{c, handleTrack}
+  trackHandler := ctx.NewFinalHandler(c, []byte(""), handleTrack)
   r.Handle("/track", middlewares.EnforceJSONHandler(middlewares.AuthHandler(middlewares.ValidateEventTrackingPayloadHandler(trackHandler)))).Methods("POST", "GET")
   connectedHandler := &ctx.Handler{c, handleConnected}
   r.Handle("/connected", connectedHandler)
