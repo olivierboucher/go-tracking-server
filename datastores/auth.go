@@ -17,8 +17,7 @@ func NewAuthInstance(db *sql.DB) *AuthDatastore {
 func (d *AuthDatastore) IsTokenAuthorized(token string) (bool, error) {
   //TODO: Change table name
   var exists bool
-  tableName := "api_tokens"
-  err := d.DB.QueryRow("SELECT EXISTS(SELECT id FROM ? WHERE token = ?)", tableName, token).Scan(&exists)
+  err := d.DB.QueryRow("SELECT EXISTS(SELECT id FROM api_tokens WHERE token = ?)", token).Scan(&exists)
 
   return exists, err
 }

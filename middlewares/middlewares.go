@@ -26,7 +26,7 @@ func AuthHandler(next *ctx.Handler) *ctx.Handler {
 
     // Internal server error TODO: Handle this
     if err != nil {
-      log.Fatal(err.Error())
+      log.Print(err.Error())
       http.Error(w, http.StatusText(500), 500)
       return
     }
@@ -56,10 +56,12 @@ func EnforceJSONHandler(next *ctx.Handler) *ctx.Handler {
       contentType := r.Header.Get("Content-Type")
 
       if mimeType != "text/plain; charset=utf-8" {
+        log.Printf("Invalid mime type. Got %s", mimeType)
         http.Error(w, http.StatusText(415), 415)
         return
       }
-      if contentType != "application/json; charset=utf-8" {
+      if contentType != "application/json; charset=UTF-8" {
+        log.Printf("Invalid content type. Got %s", contentType)
         http.Error(w, http.StatusText(415), 415)
         return
       }

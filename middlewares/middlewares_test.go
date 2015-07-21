@@ -34,12 +34,12 @@ func init() {
         //t.Errorf("An error '%s' was not expected when opening a stub database connection", err)
   }
   columns := []string{"exists"}
-  sqlmock.ExpectQuery("SELECT EXISTS\\(SELECT id FROM (.+) WHERE token = (.+)\\)").
-        WithArgs("api_tokens", "123").
+  sqlmock.ExpectQuery("SELECT EXISTS\\(SELECT id FROM api_tokens WHERE token = (.+)\\)").
+        WithArgs("123").
         WillReturnRows(sqlmock.NewRows(columns).AddRow(false))
 
-  sqlmock.ExpectQuery("SELECT EXISTS\\(SELECT id FROM (.+) WHERE token = (.+)\\)").
-        WithArgs("api_tokens", "456").
+  sqlmock.ExpectQuery("SELECT EXISTS\\(SELECT id FROM api_tokens WHERE token = (.+)\\)").
+        WithArgs("456").
         WillReturnRows(sqlmock.NewRows(columns).AddRow(true))
 
   router = mux.NewRouter()
@@ -146,7 +146,7 @@ func TestEnforceJSONHandler(t *testing.T) {
   // TESTING JSON PASS
   reader = bytes.NewBuffer([]byte(`{"testing": "is cool"}`))
   request, err = http.NewRequest("POST", testEnforceJSONUrl, reader)
-  request.Header.Set("Content-Type", "application/json; charset=utf-8")
+  request.Header.Set("Content-Type", "application/json; charset=UTF-8")
 
   res, err = http.DefaultClient.Do(request)
 
