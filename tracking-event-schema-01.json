@@ -1,3 +1,4 @@
+//The schema, draft-01
 {
   "$schema": "http://json-schema.org/draft-04/schema#",
   "id": "http://olivierboucher.com/go-tracker-server/draft-01",
@@ -37,3 +38,24 @@
   },
   "required": ["0"]
 }
+//Valid event example
+[
+  {
+    "event" : "TEST",
+    "date" : "2015-01-26",
+    "properties" : [
+      {
+        "name" : "PROP1",
+        "value" : "string value"
+      },
+      {
+        "name" : "PROP2",
+        "value" : 123
+      },
+      {
+        "name" : "PROP3",
+        "value" : 12.567
+      }
+    ]
+  }
+]
