@@ -13,7 +13,7 @@ func NewRabbitMQConnection(conn *amqp.Connection) *RabbitMQConnection {
   return &RabbitMQConnection{*conn}
 }
 //PublishEventsTrackingTask publishes a json payload to the tracking exchange
-func (c *RabbitMQConnection) PublishEventsTrackingTask(payload []byte) {
+func (c *RabbitMQConnection) PublishEventsTrackingTask(payload []byte) (error) {
   ch, err := c.Channel()
   if err != nil {
     log.Print("Error creating channel")
@@ -33,5 +33,7 @@ func (c *RabbitMQConnection) PublishEventsTrackingTask(payload []byte) {
     if err != nil {
       //Find a second way to persist the events
       log.Printf("Error publishing to tracking queue: %s", err.Error())
+      return err
     }
+    return nil
 }
