@@ -9,3 +9,7 @@ A draft for an event tracking server in Go
 - [ ] Implement a protocol over websocket (Connection, Disconnection, Validation etc)
 - [x] File based configuration for connections (DB, AMQP) in JSON - VERY BASIC
 - [ ] More tests
+
+
+##First pitch
+![Imgur](http://i.imgur.com/rqwf7Yc.png)
