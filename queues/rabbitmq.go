@@ -1,7 +1,6 @@
 package queues
 
 import (
-  "log"
   "github.com/streadway/amqp"
 )
 //RabbitMQConnection wrapper around amqp.Connection
@@ -16,7 +15,7 @@ func NewRabbitMQConnection(conn *amqp.Connection) *RabbitMQConnection {
 func (c *RabbitMQConnection) PublishEventsTrackingTask(payload []byte) (error) {
   ch, err := c.Channel()
   if err != nil {
-    log.Print("Error creating channel")
+    return err
   }
   defer ch.Close()
 
@@ -31,8 +30,6 @@ func (c *RabbitMQConnection) PublishEventsTrackingTask(payload []byte) (error) {
           Body: payload,
     })
     if err != nil {
-      //Find a second way to persist the events
-      log.Printf("Error publishing to tracking queue: %s", err.Error())
       return err
     }
     return nil

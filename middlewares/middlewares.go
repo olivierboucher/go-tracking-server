@@ -21,7 +21,7 @@ func AuthHandler(next *ctx.Handler) *ctx.Handler {
     if token == "" {
       c.Logger.Infof("%s : No token header", utilities.GetIP(r))
       token = r.URL.Query().Get("key")
-      if token == ""{
+      if token == "" {
         c.Logger.Infof("%s : No token query parameter", utilities.GetIP(r))
         http.Error(w, http.StatusText(400), 400)
         return
