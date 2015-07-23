@@ -13,7 +13,7 @@ import (
 //AuthHandler middleware
 //This handler handles auth based on the assertion that the request is valid JSON
 //Verifies for access, blocks handlers chain if access denied
-func AuthHandler(next *ctx.Handler) *ctx.Handler {
+func AuthHandler(next *ctx.FinalHandler) *ctx.Handler {
   return ctx.NewHandler(next.Context, func(c *ctx.Context, w http.ResponseWriter, r *http.Request){
     //TODO: This can change for body instead ?
     token := r.Header.Get("Tracking-Token")
