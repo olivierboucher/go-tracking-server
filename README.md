@@ -4,6 +4,7 @@ A draft for an event tracking server in Go
 [![Coverage Status](https://coveralls.io/repos/OlivierBoucher/go-tracking-server/badge.svg?branch=master&service=github)](https://coveralls.io/github/OlivierBoucher/go-tracking-server?branch=master)
 
 ##TODO
+- [ ] Make package names more relevant, merge/decouple packages that require so
 - [ ] Implement file logging for production + rotation
 - [ ] More tests
 - [x] Complete TODOS concerning logging
