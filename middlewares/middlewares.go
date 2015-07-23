@@ -1,22 +1,15 @@
 package middlewares
 
 import (
-  "net"
   "net/http"
   "io/ioutil"
 
   "github.com/xeipuuv/gojsonschema"
 
   "github.com/OlivierBoucher/go-tracking-server/ctx"
+  "github.com/OlivierBoucher/go-tracking-server/utilities"
 )
 
-func getIP(r *http.Request) string {
-    if ipProxy := r.Header.Get("X-FORWARDED-FOR"); len(ipProxy) > 0 {
-        return ipProxy
-    }
-    ip, _, _ := net.SplitHostPort(r.RemoteAddr)
-    return ip
-}
 //AuthHandler middleware
 //This handler handles auth based on the assertion that the request is valid JSON
 //Verifies for access, blocks handlers chain if access denied
@@ -26,10 +19,10 @@ func AuthHandler(next *ctx.Handler) *ctx.Handler {
     token := r.Header.Get("Tracking-Token")
     //Bad request token empty or not present
     if token == "" {
-      c.Logger.Infof("%s : No token header", getIP(r))
+      c.Logger.Infof("%s : No token header", utilities.GetIP(r))
       token = r.URL.Query().Get("key")
       if token == ""{
-        c.Logger.Infof("%s : No token query parameter", getIP(r))
+        c.Logger.Infof("%s : No token query parameter", utilities.GetIP(r))
         http.Error(w, http.StatusText(400), 400)
         return
       }
@@ -39,17 +32,17 @@ func AuthHandler(next *ctx.Handler) *ctx.Handler {
 
     // Internal server error TODO: Handle this
     if err != nil {
-      c.Logger.Errorf("%s : Error while authorizing: %s", getIP(r), err.Error())
+      c.Logger.Errorf("%s : Error while authorizing: %s", utilities.GetIP(r), err.Error())
       http.Error(w, http.StatusText(500), 500)
       return
     }
     // Unauthorized
     if !authorized {
-      c.Logger.Warnf("%s : Unauthorized: %s", getIP(r), token)
+      c.Logger.Warnf("%s : Unauthorized: %s", utilities.GetIP(r), token)
       http.Error(w, http.StatusText(401), 401)
       return
     }
-    c.Logger.Infof("%s : Authorized", getIP(r))
+    c.Logger.Infof("%s : Authorized", utilities.GetIP(r))
     next.ServeHTTP(w, r)
   })
 }
@@ -60,14 +53,14 @@ func EnforceJSONHandler(next *ctx.Handler) *ctx.Handler {
     return ctx.NewHandler(next.Context, func(c *ctx.Context, w http.ResponseWriter, r *http.Request) {
       //Ensure that there is a body
       if r.ContentLength == 0 {
-        c.Logger.Infof("%s : Recieved empty payload", getIP(r))
+        c.Logger.Infof("%s : Recieved empty payload", utilities.GetIP(r))
         http.Error(w, http.StatusText(400), 400)
         return
       }
       //Ensure that its json
       contentType := r.Header.Get("Content-Type")
       if contentType != "application/json; charset=UTF-8" {
-        c.Logger.Infof("%s : Invalid content type. Got %s", getIP(r), contentType)
+        c.Logger.Infof("%s : Invalid content type. Got %s", utilities.GetIP(r), contentType)
         http.Error(w, http.StatusText(415), 415)
         return
       }
@@ -81,7 +74,7 @@ func ValidateEventTrackingPayloadHandler(next *ctx.FinalHandler) *ctx.Handler {
       //Validate the payload
       body, err := ioutil.ReadAll(r.Body)
       if err != nil {
-        c.Logger.Errorf("%s : Error reading body: %s", getIP(r), err.Error())
+        c.Logger.Errorf("%s : Error reading body: %s", utilities.GetIP(r), err.Error())
         http.Error(w, http.StatusText(500), 500)
         return
       }
@@ -90,13 +83,13 @@ func ValidateEventTrackingPayloadHandler(next *ctx.FinalHandler) *ctx.Handler {
 
       result, err  := c.JSONTrackingEventValidator.Schema.Validate(requestLoader)
       if err != nil {
-          c.Logger.Infof("%s : Json validation error: %s", getIP(r), err.Error())
+          c.Logger.Infof("%s : Json validation error: %s", utilities.GetIP(r), err.Error())
           http.Error(w, http.StatusText(400), 400)
           return
       }
 
       if ! result.Valid() {
-        c.Logger.Infof("%s : Payload is not valid: %+v", getIP(r), result.Errors())
+        c.Logger.Infof("%s : Payload is not valid: %+v", utilities.GetIP(r), result.Errors())
         http.Error(w, http.StatusText(400), 400)
         return
       }
