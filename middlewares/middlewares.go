@@ -27,8 +27,12 @@ func AuthHandler(next *ctx.Handler) *ctx.Handler {
     //Bad request token empty or not present
     if token == "" {
       c.Logger.Infof("%s : No token header", getIP(r))
-      http.Error(w, http.StatusText(400), 400)
-      return
+      token = r.URL.Query().Get("key")
+      if token == ""{
+        c.Logger.Infof("%s : No token query parameter", getIP(r))
+        http.Error(w, http.StatusText(400), 400)
+        return
+      }
     }
 
     authorized, err := c.AuthDb.IsTokenAuthorized(token)
@@ -86,8 +90,8 @@ func ValidateEventTrackingPayloadHandler(next *ctx.FinalHandler) *ctx.Handler {
 
       result, err  := c.JSONTrackingEventValidator.Schema.Validate(requestLoader)
       if err != nil {
-          c.Logger.Errorf("%s : Json validation error: %s", getIP(r), err.Error())
-          http.Error(w, http.StatusText(500), 500)
+          c.Logger.Infof("%s : Json validation error: %s", getIP(r), err.Error())
+          http.Error(w, http.StatusText(400), 400)
           return
       }
 

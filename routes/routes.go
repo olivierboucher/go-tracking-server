@@ -4,7 +4,6 @@ import (
   "net"
   "net/http"
   "time"
-  "log"
 
   "github.com/gorilla/mux"
   "github.com/gorilla/websocket"
@@ -13,6 +12,19 @@ import (
   "github.com/OlivierBoucher/go-tracking-server/middlewares"
   "github.com/OlivierBoucher/go-tracking-server/ctx"
 )
+
+type wsResponse struct {
+  Result string `json:"result"`
+  ErrorMsg string `json:"error"`
+}
+
+func getIP(r *http.Request) string {
+    if ipProxy := r.Header.Get("X-FORWARDED-FOR"); len(ipProxy) > 0 {
+        return ipProxy
+    }
+    ip, _, _ := net.SplitHostPort(r.RemoteAddr)
+    return ip
+}
 
 var upgrader = websocket.Upgrader{
     ReadBufferSize:  1024,
@@ -31,16 +43,19 @@ func handleTrack(c *ctx.Context, p []byte, w http.ResponseWriter, r *http.Reques
     c.Logger.Errorf("Error publishing to queue: %s\nPayload: %s", err.Error(), string(p))
     http.Error(w, http.StatusText(500), 500)
   }
+  c.Logger.Infof("%s : Valid payload recieved and treated", getIP(r))
 }
 //Handler for /connected route
 //Allows websocket connection
 //From here we have an authentified request
 func handleConnected(c *ctx.Context, w http.ResponseWriter, r *http.Request) {
-    const pongWait time.Duration = 10 //seconds
+    const pongWait time.Duration = 10 * time.Second
+    const writeWait time.Duration = 10 * time.Second
 
     conn, err := upgrader.Upgrade(w, r, nil)
     if err != nil {
         //TODO : Could we handle this a little better?
+        c.Logger.Errorf("%s : Could not upgrade to websocket protocol: %s", getIP(r), err.Error())
         http.Error(w, http.StatusText(500), 500)
         return
     }
@@ -57,36 +72,45 @@ func handleConnected(c *ctx.Context, w http.ResponseWriter, r *http.Request) {
         messageType, payload, err := conn.ReadMessage()
         if err != nil {
           if neterr, ok := err.(net.Error); ok && neterr.Timeout() {
-              //Timeout error
+              c.Logger.Infof("%s : Connection timeout: %s", getIP(r), err.Error())
+              err = conn.WriteControl(websocket.CloseMessage, []byte("Timeout"), time.Now().Add(writeWait))
               return
           }
-          //Unhandled error
-          //Maybe log something?
+          c.Logger.Infof("%s : Error reading message: %s", getIP(r), err.Error())
+          err = conn.WriteControl(websocket.CloseInvalidFramePayloadData, []byte("Cannot read message"), time.Now().Add(writeWait))
           return
         }
 
         if messageType != websocket.TextMessage {
-            //The message type is not handled
+            c.Logger.Infof("%s : Unhandled message type : %d", getIP(r), messageType)
+            err = conn.WriteControl(websocket.CloseUnsupportedData, []byte("Unhandled message type"), time.Now().Add(writeWait))
             return
         }
         //We need to validate the payload and then send it
         payloadLoader := gojsonschema.NewStringLoader(string(payload))
         result, err  := c.JSONTrackingEventValidator.Schema.Validate(payloadLoader)
         if err != nil {
-            log.Printf("Json validation error: %s", err.Error())
-            //TODO : Send an ack with the error
+            c.Logger.Infof("%s : Json validation error: %s", getIP(r), err.Error())
+            err = conn.WriteControl(websocket.CloseUnsupportedData, []byte("Json validation error"), time.Now().Add(writeWait))
+            return
         }
 
         if ! result.Valid() {
-          log.Printf("Invalid payload")
-          //TODO : Send an ack with the error
+          c.Logger.Infof("%s : Payload is not valid: %+v", getIP(r), result.Errors())
+          conn.SetWriteDeadline(time.Now().Add(writeWait))
+          err = conn.WriteJSON(&wsResponse{"ERROR","Invalid payload"})
+          return
         }
         err = c.Queue.PublishEventsTrackingTask(payload)
         if err != nil {
           //TODO : Could we handle this a little better?
+          c.Logger.Errorf("%s : Error publishing to queue: %s\nPayload: %s", getIP(r), err.Error(), string(payload))
           http.Error(w, http.StatusText(500), 500)
         }
         //TODO: ack the request
+        c.Logger.Infof("%s : Valid payload recieved and treated", getIP(r))
+        conn.SetWriteDeadline(time.Now().Add(writeWait))
+        conn.WriteJSON(&wsResponse{"OK",""})
     }
 }
 //Handlers  Returns a mux router containing all handlers for all routes
