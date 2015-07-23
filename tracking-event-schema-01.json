@@ -38,7 +38,7 @@
   },
   "required": ["0"]
 }
-//Valid event example
+//Valid payload example
 [
   {
     "event" : "TEST",

@@ -1,0 +1,79 @@
+//The schema draft-02
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "id": "http://olivierboucher.com/go-tracker-server/draft-02",
+  "type": "object",
+  "properties": {
+    "token": {
+      "id": "http://olivierboucher.com/go-tracker-server/draft-02/token",
+      "type": "string"
+    },
+    "events": {
+      "id": "http://olivierboucher.com/go-tracker-server/draft-02/events",
+      "type": "array",
+      "items": {
+        "id": "http://olivierboucher.com/go-tracker-server/draft-02/events/0",
+        "type": "object",
+        "properties": {
+          "event": {
+            "id": "http://olivierboucher.com/go-tracker-server/draft-02/events/0/event",
+            "type": "string"
+          },
+          "date": {
+            "id": "http://olivierboucher.com/go-tracker-server/draft-02/events/0/date",
+            "type": "string"
+          },
+          "properties": {
+            "id": "http://olivierboucher.com/go-tracker-server/draft-02/events/0/properties",
+            "type": "array",
+            "items": {
+              "id": "http://olivierboucher.com/go-tracker-server/draft-02/events/0/properties/2",
+              "type": "object",
+              "properties": {
+                "name": {
+                  "id": "http://olivierboucher.com/go-tracker-server/draft-02/events/0/properties/2/name",
+                  "type": "string"
+                },
+                "value": {
+                  "id": "http://olivierboucher.com/go-tracker-server/draft-02/events/0/properties/2/value",
+                  "type": ["string", "number"]
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "token",
+    "events"
+  ]
+}
+//Valid payload example
+{
+  "token": "TOKEN",
+  "events": [
+    {
+      "event": "TEST",
+      "date": "2015-01-26",
+      "properties": [
+        {
+          "name": "PROP1",
+          "value": "string value"
+        },
+        {
+          "name": "PROP2",
+          "value": 123
+        },
+        {
+          "name": "PROP3",
+          "value": 12.567
+        }
+      ]
+    }
+  ]
+}
