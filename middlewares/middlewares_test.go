@@ -31,8 +31,9 @@ var (
 func init() {
   mockedDb, err := sqlmock.New()
   if err != nil {
-        //t.Errorf("An error '%s' was not expected when opening a stub database connection", err)
+    log.Fatalf("An error: %s, was not expected when opening a stub database connection", err.Error())
   }
+
   columns := []string{"exists"}
   sqlmock.ExpectQuery("SELECT EXISTS\\(SELECT id FROM api_tokens WHERE token = (.+)\\)").
         WithArgs("123").
@@ -42,8 +43,13 @@ func init() {
         WithArgs("456").
         WillReturnRows(sqlmock.NewRows(columns).AddRow(true))
 
+  trackingValidator, err := validators.NewJSONEventTrackingValidator()
+  if err != nil {
+    log.Fatalf("An error: %s, was not expected when initializing tracking validator", err.Error())
+  }
+
   router = mux.NewRouter()
-  context := ctx.NewContext(datastores.NewAuthInstance(mockedDb), nil, validators.NewJSONEventTrackingValidator())
+  context := ctx.NewContext(datastores.NewAuthInstance(mockedDb), nil, trackingValidator, "DEVELOPMENT")
   testHandler := ctx.NewHandler(context, testHandle)
   testFinalHander := ctx.NewFinalHandler(context, []byte(""), testFinalHandle)
 

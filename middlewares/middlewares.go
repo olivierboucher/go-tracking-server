@@ -1,14 +1,22 @@
 package middlewares
 
 import (
+  "net"
   "net/http"
-  "log"
   "io/ioutil"
 
   "github.com/xeipuuv/gojsonschema"
 
   "github.com/OlivierBoucher/go-tracking-server/ctx"
 )
+
+func getIP(r *http.Request) string {
+    if ipProxy := r.Header.Get("X-FORWARDED-FOR"); len(ipProxy) > 0 {
+        return ipProxy
+    }
+    ip, _, _ := net.SplitHostPort(r.RemoteAddr)
+    return ip
+}
 //AuthHandler middleware
 //This handler handles auth based on the assertion that the request is valid JSON
 //Verifies for access, blocks handlers chain if access denied
@@ -18,6 +26,7 @@ func AuthHandler(next *ctx.Handler) *ctx.Handler {
     token := r.Header.Get("Tracking-Token")
     //Bad request token empty or not present
     if token == "" {
+      c.Logger.Infof("%s : No token header", getIP(r))
       http.Error(w, http.StatusText(400), 400)
       return
     }
@@ -26,17 +35,17 @@ func AuthHandler(next *ctx.Handler) *ctx.Handler {
 
     // Internal server error TODO: Handle this
     if err != nil {
-      log.Print(err.Error())
+      c.Logger.Errorf("%s : Error while authorizing: %s", getIP(r), err.Error())
       http.Error(w, http.StatusText(500), 500)
       return
     }
     // Unauthorized
     if !authorized {
-      log.Print("Unauthorized")
+      c.Logger.Warnf("%s : Unauthorized: %s", getIP(r), token)
       http.Error(w, http.StatusText(401), 401)
       return
     }
-    log.Print("Authorized")
+    c.Logger.Infof("%s : Authorized", getIP(r))
     next.ServeHTTP(w, r)
   })
 }
@@ -47,13 +56,14 @@ func EnforceJSONHandler(next *ctx.Handler) *ctx.Handler {
     return ctx.NewHandler(next.Context, func(c *ctx.Context, w http.ResponseWriter, r *http.Request) {
       //Ensure that there is a body
       if r.ContentLength == 0 {
+        c.Logger.Infof("%s : Recieved empty payload", getIP(r))
         http.Error(w, http.StatusText(400), 400)
         return
       }
       //Ensure that its json
       contentType := r.Header.Get("Content-Type")
       if contentType != "application/json; charset=UTF-8" {
-        log.Printf("Invalid content type. Got %s", contentType)
+        c.Logger.Infof("%s : Invalid content type. Got %s", getIP(r), contentType)
         http.Error(w, http.StatusText(415), 415)
         return
       }
@@ -67,7 +77,7 @@ func ValidateEventTrackingPayloadHandler(next *ctx.FinalHandler) *ctx.Handler {
       //Validate the payload
       body, err := ioutil.ReadAll(r.Body)
       if err != nil {
-        log.Printf("Error reading body: %s", err.Error())
+        c.Logger.Errorf("%s : Error reading body: %s", getIP(r), err.Error())
         http.Error(w, http.StatusText(500), 500)
         return
       }
@@ -76,12 +86,13 @@ func ValidateEventTrackingPayloadHandler(next *ctx.FinalHandler) *ctx.Handler {
 
       result, err  := c.JSONTrackingEventValidator.Schema.Validate(requestLoader)
       if err != nil {
-          log.Printf("Json validation error: %s", err.Error())
+          c.Logger.Errorf("%s : Json validation error: %s", getIP(r), err.Error())
           http.Error(w, http.StatusText(500), 500)
           return
       }
 
       if ! result.Valid() {
+        c.Logger.Infof("%s : Payload is not valid: %+v", getIP(r), result.Errors())
         http.Error(w, http.StatusText(400), 400)
         return
       }

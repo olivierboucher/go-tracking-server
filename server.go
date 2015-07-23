@@ -6,7 +6,6 @@ import (
   "database/sql"
   "io/ioutil"
   "encoding/json"
-  "os"
 
   "github.com/streadway/amqp"
 
@@ -27,31 +26,34 @@ func main() {
 
   authDb, err := sql.Open("mysql", config.AuthDbConnectionString)
   if err != nil {
-    log.Fatalf("Error on initializing database connection: %s", err.Error())
-    os.Exit(1)
+    log.Fatalf("FATAL ERROR: initializing database connection: %s", err.Error())
   }
   defer authDb.Close()
 
   queueConn, err := amqp.Dial(config.QueueConnectionUrl)
   if err != nil {
-    log.Fatalf("Error on initializing persistent queue connection: %s", err.Error())
-    os.Exit(1)
+    log.Fatalf("FATAL ERROR: initializing persistent queue connection: %s", err.Error())
   }
   defer queueConn.Close()
+
+  trackingValidator, err := validators.NewJSONEventTrackingValidator()
+  if err != nil {
+    log.Fatalf("FATAL ERROR: initializing tracking validator: %s", err.Error())
+  }
 
   context := ctx.NewContext(
     datastores.NewAuthInstance(authDb),
     queues.NewRabbitMQConnection(queueConn),
-    validators.NewJSONEventTrackingValidator())
+    trackingValidator,
+    "DEVELOPMENT")
 
-  log.Fatal(http.ListenAndServe(":1337", routes.Handlers(context)))
+  context.Logger.Fatalf("FATAL ERROR: from server: %+v", http.ListenAndServe(":1337", routes.Handlers(context)))
 }
 
 func loadJSONConfig() *srvConfiguration {
   file, err := ioutil.ReadFile("./config.json")
   if err != nil {
-    log.Fatalf("Error on reading json config: %s", err.Error())
-    os.Exit(1)
+    log.Fatalf("FATAL ERROR: reading json config: %s", err.Error())
   }
 
   var config srvConfiguration

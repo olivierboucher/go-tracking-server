@@ -11,10 +11,10 @@ type JSONEventTrackingValidator struct {
   Schema *gojsonschema.Schema
 }
 //NewJSONEventTrackingValidator returns a new JSONEventTrackingValidator with the parsed Schema
-func NewJSONEventTrackingValidator() *JSONEventTrackingValidator {
+func NewJSONEventTrackingValidator() (*JSONEventTrackingValidator, error) {
   schema, err := gojsonschema.NewSchema(gojsonschema.NewStringLoader(schema))
   if err != nil {
-    panic(err)
+    return nil, err
   }
-  return &JSONEventTrackingValidator{schema}
+  return &JSONEventTrackingValidator{schema}, err
 }

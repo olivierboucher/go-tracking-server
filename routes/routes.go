@@ -28,6 +28,7 @@ func handleTrack(c *ctx.Context, p []byte, w http.ResponseWriter, r *http.Reques
   err := c.Queue.PublishEventsTrackingTask(p)
   if err != nil {
     //TODO : Could we handle this a little better?
+    c.Logger.Errorf("Error publishing to queue: %s\nPayload: %s", err.Error(), string(p))
     http.Error(w, http.StatusText(500), 500)
   }
 }
@@ -35,7 +36,7 @@ func handleTrack(c *ctx.Context, p []byte, w http.ResponseWriter, r *http.Reques
 //Allows websocket connection
 //From here we have an authentified request
 func handleConnected(c *ctx.Context, w http.ResponseWriter, r *http.Request) {
-    const pongWait time.Duration = 10
+    const pongWait time.Duration = 10 //seconds
 
     conn, err := upgrader.Upgrade(w, r, nil)
     if err != nil {
