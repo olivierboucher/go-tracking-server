@@ -19,6 +19,12 @@ func GetIP(r *http.Request) string {
 type SrvConfiguration struct {
   AuthDbConnectionString string `json:"authDb"`
   QueueConnectionUrl string `json:"queueUrl"`
+  StorageDbParams cassandraParameters `json:"storageDb"`
+}
+type cassandraParameters struct {
+  ClusterUrls string `json:"clusterUrls"`
+  Username string `json:"username"`
+  Password string `json:"password"`
 }
 //LoadJSONConfig returns a SrvConfiguration struct from a json file
 func LoadJSONConfig() (*SrvConfiguration, error) {

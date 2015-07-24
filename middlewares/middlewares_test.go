@@ -49,7 +49,7 @@ func init() {
 	}
 
 	router = mux.NewRouter()
-	context := ctx.NewContext(datastores.NewAuthInstance(mockedDb), nil, trackingValidator, "DEVELOPMENT")
+	context := ctx.NewContext(datastores.NewAuthInstance(mockedDb), nil, nil, trackingValidator, "DEV")
 	testHandler := ctx.NewHandler(context, testHandle)
 	testFinalHander := ctx.NewFinalHandler(context, []byte(""), testFinalHandle)
 
