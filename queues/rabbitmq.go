@@ -34,3 +34,21 @@ func (c *RabbitMQConnection) PublishEventsTrackingTask(payload []byte) (error) {
     }
     return nil
 }
+//ConsumeQueue consumes a RabbitMQConnection queue with predefined settings
+func (c *RabbitMQConnection) ConsumeQueue(queue string ) (<-chan amqp.Delivery, error) {
+  ch, err := c.Channel()
+  if err != nil {
+    return nil, err
+  }
+  defer ch.Close()
+
+  return ch.Consume(
+    queue,
+    "",
+    false, //Auto ACK. False because we want to make sure of data integrity
+    false,
+    false,
+    false,
+    nil,
+  )
+}
