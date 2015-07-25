@@ -23,6 +23,7 @@ type SrvConfiguration struct {
 }
 type cassandraParameters struct {
   ClusterUrls string `json:"clusterUrls"`
+  Keyspace string `json:"keyspace"`
   Username string `json:"username"`
   Password string `json:"password"`
 }

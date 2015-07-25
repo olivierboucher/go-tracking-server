@@ -43,6 +43,7 @@ func main() {
 
   if *processorFlagPtr {
     cluster := gocql.NewCluster(strings.Split(config.StorageDbParams.ClusterUrls, "|")...)
+    cluster.Keyspace = config.StorageDbParams.Keyspace
     cluster.Authenticator = gocql.PasswordAuthenticator{
       Username: config.StorageDbParams.Username,
       Password: config.StorageDbParams.Password,
