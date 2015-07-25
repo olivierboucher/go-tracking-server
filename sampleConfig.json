@@ -1,0 +1,10 @@
+{
+  "authDb" : "user:password@tcp(server:3306)/go-tracking-server",
+  "queueUrl" : "amqp://user:password@server/instance",
+  "storageDb" : {
+    "clusterUrls" : "instance01|instance02|instance03",
+    "keyspace": "Tracking",
+    "username": "user",
+    "password": "password"
+  }
+}
