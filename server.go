@@ -16,6 +16,7 @@ import (
   "github.com/OlivierBoucher/go-tracking-server/queues"
   "github.com/OlivierBoucher/go-tracking-server/validators"
   "github.com/OlivierBoucher/go-tracking-server/utilities"
+  "github.com/OlivierBoucher/go-tracking-server/processor"
 )
 
 
@@ -94,7 +95,7 @@ func startProcessingServer(context *ctx.Context) {
   go func() {
     for m := range msgs {
       context.Logger.Infof("Recieved a message: %s", m.MessageId)
-      //TODO : Store the payload in database
+      processor.ProcessMessage(context, m)
     }
   }()
 

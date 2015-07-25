@@ -2,8 +2,10 @@ package datastores
 
 import (
   "github.com/gocql/gocql"
-)
 
+  "github.com/OlivierBoucher/go-tracking-server/models"
+)
+//StorageDatastore wraps a gocql.Session
 type StorageDatastore struct {
   *gocql.Session
 }
@@ -18,4 +20,27 @@ func NewStorageInstance(cluster *gocql.ClusterConfig) (*StorageDatastore, error)
 //Close closes the internal gocql.Session instance
 func (d *StorageDatastore) Close() {
   d.Session.Close()
+}
+//StoreBatchEvents stores multiple events from models.EventTrackingPayload within a batch
+func (d *StorageDatastore) StoreBatchEvents(p *models.EventTrackingPayload) error {
+  batch := gocql.NewBatch(gocql.LoggedBatch)
+  
+  statement := `INSERT INTO Tracking.events (id, client, name, date, properties) VALUES (?, ?, ?, ?, ?)`
+
+  for _,e := range p.Events {
+    //Generate a new UUID
+    u4, err := gocql.RandomUUID()
+    if err != nil {
+      return err
+    }
+    //Add to batch
+    batch.Query(statement, u4.String(), p.Token, e.Name, e.Date, e.Properties)
+  }
+
+  err := d.Session.ExecuteBatch(batch)
+  if err != nil {
+    return err
+  }
+
+  return nil
 }

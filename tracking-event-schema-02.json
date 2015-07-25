@@ -15,7 +15,7 @@
         "id": "http://olivierboucher.com/go-tracker-server/draft-02/events/0",
         "type": "object",
         "properties": {
-          "event": {
+          "name": {
             "id": "http://olivierboucher.com/go-tracker-server/draft-02/events/0/event",
             "type": "string"
           },
