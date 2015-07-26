@@ -8,6 +8,7 @@ install:
   - go get github.com/streadway/amqp
   - go get github.com/xeipuuv/gojsonschema
   - go get github.com/Sirupsen/logrus
+  - go get github.com/gocql/gocql
   - go get github.com/DATA-DOG/go-sqlmock
   - go get github.com/axw/gocov/gocov
   - go get github.com/modocache/gover
