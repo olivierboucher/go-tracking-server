@@ -2,7 +2,7 @@ package datastores
 
 import (
   "github.com/gocql/gocql"
-  "log"
+
   "github.com/OlivierBoucher/go-tracking-server/models"
 )
 //StorageDatastore wraps a gocql.Session
@@ -33,14 +33,12 @@ func (d *StorageDatastore) StoreBatchEvents(p *models.EventTrackingPayload) erro
     if err != nil {
       return err
     }
-    log.Printf("Event: %+v", e)
     //map properties
     var propMap map[string]string
     propMap = make(map[string]string)
     for _,property := range e.Properties {
       propMap[property.Name] = property.Value
     }
-    log.Printf("Properties: %+v", propMap)
     //Add to batch
     batch.Query(statement, u4.String(), p.Token, e.Name, e.Date, propMap)
   }

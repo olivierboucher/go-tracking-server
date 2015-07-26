@@ -85,7 +85,13 @@ func startTrackingServer(context *ctx.Context) {
 }
 
 func startProcessingServer(context *ctx.Context) {
-  msgs, err := context.Queue.ConsumeQueue("tracking-queue")
+  ch, err := context.Queue.Channel()
+  if err != nil {
+    context.Logger.Fatalf("FATAL ERROR: from openning channel: %s", err.Error())
+  }
+  defer ch.Close()
+  
+  msgs, err := context.Queue.ConsumeQueueWithChannel("tracking-queue", ch)
   if err != nil {
     context.Logger.Fatalf("FATAL ERROR: from queue consuming: %s", err.Error())
   }
