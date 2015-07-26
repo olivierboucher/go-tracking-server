@@ -1,5 +1,7 @@
 package models
-
+ import (
+   "time"
+ )
 //EventTrackingPayload represents an event tracking payload's json
 type EventTrackingPayload struct {
   Token string `json:"token"`
@@ -8,6 +10,10 @@ type EventTrackingPayload struct {
 //Event represent an event and its datapoints
 type Event struct {
   Name string `json:"name"`
-  Date string `json:"date"`
-  Properties map[string]string `json:"properties"`
+  Date time.Time `json:"date"`
+  Properties []EventProperty `json:"properties"`
+}
+type EventProperty struct {
+  Name string `json:"name"`
+  Value string `json:"value"`
 }

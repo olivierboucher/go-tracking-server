@@ -95,7 +95,7 @@ func startProcessingServer(context *ctx.Context) {
   go func() {
     for m := range msgs {
       context.Logger.Infof("Recieved a message: %s", m.MessageId)
-      processor.ProcessMessage(context, m)
+      processor.ProcessMessage(context, &m)
     }
   }()
 

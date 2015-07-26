@@ -36,7 +36,7 @@
                 },
                 "value": {
                   "id": "http://olivierboucher.com/go-tracker-server/draft-02/events/0/properties/2/value",
-                  "type": ["string", "number"]
+                  "type": "string"
                 }
               },
               "additionalProperties": false
@@ -59,7 +59,7 @@
   "events": [
     {
       "name": "TEST",
-      "date": "2015-01-26",
+      "date": "2015-07-26T15:35:49+00:00",
       "properties": [
         {
           "name": "PROP1",
@@ -67,11 +67,11 @@
         },
         {
           "name": "PROP2",
-          "value": 123
+          "value": "123"
         },
         {
           "name": "PROP3",
-          "value": 12.567
+          "value": "12.567"
         }
       ]
     }

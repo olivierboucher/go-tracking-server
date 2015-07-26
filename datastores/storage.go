@@ -2,7 +2,7 @@ package datastores
 
 import (
   "github.com/gocql/gocql"
-
+  "log"
   "github.com/OlivierBoucher/go-tracking-server/models"
 )
 //StorageDatastore wraps a gocql.Session
@@ -24,8 +24,8 @@ func (d *StorageDatastore) Close() {
 //StoreBatchEvents stores multiple events from models.EventTrackingPayload within a batch
 func (d *StorageDatastore) StoreBatchEvents(p *models.EventTrackingPayload) error {
   batch := gocql.NewBatch(gocql.LoggedBatch)
-  
-  statement := `INSERT INTO Tracking.events (id, client, name, date, properties) VALUES (?, ?, ?, ?, ?)`
+
+  statement := `INSERT INTO tracking.events (id, client, name, date, properties) VALUES (?, ?, ?, ?, ?)`
 
   for _,e := range p.Events {
     //Generate a new UUID
@@ -33,8 +33,16 @@ func (d *StorageDatastore) StoreBatchEvents(p *models.EventTrackingPayload) erro
     if err != nil {
       return err
     }
+    log.Printf("Event: %+v", e)
+    //map properties
+    var propMap map[string]string
+    propMap = make(map[string]string)
+    for _,property := range e.Properties {
+      propMap[property.Name] = property.Value
+    }
+    log.Printf("Properties: %+v", propMap)
     //Add to batch
-    batch.Query(statement, u4.String(), p.Token, e.Name, e.Date, e.Properties)
+    batch.Query(statement, u4.String(), p.Token, e.Name, e.Date, propMap)
   }
 
   err := d.Session.ExecuteBatch(batch)
