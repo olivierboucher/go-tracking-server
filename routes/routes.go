@@ -111,7 +111,7 @@ func Handlers(c *ctx.Context) *mux.Router {
   r := mux.NewRouter()
   //Each supported route is being added to the router
   trackHandler := ctx.NewFinalHandler(c, []byte(""), handleTrack)
-  r.Handle("/track", middlewares.EnforceJSONHandler(middlewares.AuthHandler(middlewares.ValidateEventTrackingPayloadHandler(trackHandler)))).Methods("POST", "GET")
+  r.Handle("/track", middlewares.EnforceJSONHandler(middlewares.AuthHandler(middlewares.ValidateEventTrackingPayloadHandler(trackHandler)))).Methods("POST")
   connectedHandler := &ctx.Handler{c, handleConnected}
   r.Handle("/connected", middlewares.AuthHandler(connectedHandler)).Methods("GET")
 
