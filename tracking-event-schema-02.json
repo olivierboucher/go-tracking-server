@@ -58,7 +58,7 @@
   "token": "TOKEN",
   "events": [
     {
-      "event": "TEST",
+      "name": "TEST",
       "date": "2015-01-26",
       "properties": [
         {

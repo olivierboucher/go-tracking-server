@@ -190,7 +190,7 @@ func TestValidateEventTrackingPayloadHandler(t *testing.T) {
 	log.Print("Invalid json conditional passed")
 
 	//TESTING VALID JSON
-	reader = bytes.NewBuffer([]byte(`{"token":"TOKEN","events":[{"event":"TEST","date":"2015-01-26","properties":[{"name":"PROP1","value":"string value"},{"name":"PROP2","value":123},{"name":"PROP3","value":12.567}]}]}`))
+	reader = bytes.NewBuffer([]byte(`{"token":"TOKEN","events":[{"name":"TEST","date":"2015-01-26","properties":[{"name":"PROP1","value":"string value"},{"name":"PROP2","value":123},{"name":"PROP3","value":12.567}]}]}`))
 	request, err = http.NewRequest("POST", testValidateEventTrackingPayloadHandlerUrl, reader)
 
 	res, err = http.DefaultClient.Do(request)
