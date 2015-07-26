@@ -29,7 +29,7 @@ type cassandraParameters struct {
 }
 //LoadJSONConfig returns a SrvConfiguration struct from a json file
 func LoadJSONConfig() (*SrvConfiguration, error) {
-  file, err := ioutil.ReadFile("./configLocal.json")
+  file, err := ioutil.ReadFile("./config.json")
   if err != nil {
     return nil, err
   }
