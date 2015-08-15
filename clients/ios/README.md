@@ -12,10 +12,10 @@ Then you can start tracking events
 ```objective-c
 //Create an event
 NSString *eventName = @"SomeEvent";
-NSDictionnary *eventProps = @{
+NSDictionary *eventProps = @{
   @"prop1": "foo",
   @"prop2": "bar"
 };
 //Report it
-[tracker reportEvent:eventName WithParams:eventProps];
+[tracker reportEvent:eventName withParams:eventProps];
 ```
