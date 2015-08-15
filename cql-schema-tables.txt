@@ -1,2 +1,8 @@
 # Events table
-CREATE TABLE Tracking.events (id uuid PRIMARY KEY, client varchar, name varchar, date timestamp, properties map<varchar, varchar>);
+CREATE TABLE Tracking.events(
+id uuid,
+client varchar,
+name varchar,
+date timestamp,
+properties map<varchar, varchar>,
+PRIMARY KEY (client, name, date, id));
