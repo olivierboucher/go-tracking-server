@@ -17,5 +17,5 @@ NSDictionary *eventProps = @{
   @"prop2": "bar"
 };
 //Report it
-[tracker reportEvent:eventName WithParams:eventProps];
+[tracker reportEvent:eventName withParams:eventProps];
 ```
