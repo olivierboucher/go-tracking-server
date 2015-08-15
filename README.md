@@ -5,7 +5,7 @@ A draft for an event tracking server in Go
 
 ##TODO
 - [ ] Make package names more relevant, merge/decouple packages that require so
-- [ ] Implement file logging for production + rotation
+- [x] Implement file logging for production + rotation (Using supervisor for rotation)
 - [ ] More tests
 - [x] Complete TODOS concerning logging
 - [x] Complete TODOS concerning error handling - Decide actions to undertake based on situations
