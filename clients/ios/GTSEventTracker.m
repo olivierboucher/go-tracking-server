@@ -407,7 +407,7 @@
     });
 }
 // =========================    PUBLIC METHODS ==========================
-- (void)reportEvent:(NSString*)name WithParams:(NSDictionary*)params {
+- (void)reportEvent:(NSString*)name withParams:(NSDictionary*)params {
     dispatch_async(self.serialQueue, ^{
         NSDate *now = [NSDate date];
         //We initialize an array

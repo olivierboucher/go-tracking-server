@@ -11,5 +11,5 @@
 @interface GTSEventTracker : NSObject
 
 + (id)sharedInstanceWithToken:(NSString *)token andClientId:(NSString *)ClientId;
-- (void) reportEvent:(NSString*)name WithParams:(NSDictionary*)params;
+- (void) reportEvent:(NSString*)name withParams:(NSDictionary*)params;
 @end
